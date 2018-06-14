@@ -1,0 +1,28 @@
+// Peterson's Algorithm : 
+//There is no starvation, each process progresses without being stuck, and critical section is accessed by both processes over and over again.
+
+// flag indicates the desire to enter the critical section
+//turn is used by a process to allow the other finish waiting and proceed to critical section
+bool turn, flag[2];
+bool critical[2];
+int _pid = 0;
+void user( )
+{
+while(true){
+	
+flag[_pid]=1;
+turn = _pid;
+while( flag[1-pid] && turn == 1-pid );
+
+critical [_pid]= 1;
+
+/*critical section */
+
+critical[_pid] = 0;
+
+flag[_pid] =0;
+	
+}
+
+
+}

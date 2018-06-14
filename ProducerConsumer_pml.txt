@@ -1,0 +1,134 @@
+/*
+ * Cirular buffer to hold messages (process id and a rotating value up to MAX).
+ * Producer Consumer Buffer Problem 
+ */
+#define MAXIMUM 1
+#define BUFFERSIZE 2
+
+#define message byte
+
+message buffer[BUFFERSIZE] ;
+byte head = 0 ;
+byte tail = 0 ;
+
+#define sema byte
+#define down(s) { atomic{s > 0 ; s--} }
+#define up(s)   { s++ }
+
+sema fullslots = 0 ;
+sema emptyslots = BUFFERSIZE ;
+sema p_mutex = 1 ;
+byte p_want  = 0 ;
+sema c_mutex = 1 ;
+byte c_want  = 0 ;
+
+// Define the number of Producers 
+active [1] proctype Producer(byte id) {
+                
+	do
+	::
+		/*
+		 * Produce a message with a value
+		 */
+		printf("P%d produces an item for the buffer \n", id) ;
+    p_want++ ;
+    down(p_mutex) ;
+
+		/*
+		 * Put message in next empty slot
+		 */
+		down(emptyslots) ;
+    p_want-- ;
+
+		buffer[tail] = id ;
+		tail = (tail + 1) % BUFFERSIZE ;
+
+		up(fullslots) ;
+                     up(p_mutex)
+    	od ;
+	
+	
+}
+
+/*Define the number of Consumers */
+active [1] proctype Consumer(byte id) {
+	message from ;
+
+	do
+	::
+		/*
+		 * Get message from the buffer
+		 */
+    c_want++ ;
+    down(c_mutex) ;
+		down(fullslots) ;
+    c_want-- ;
+
+		from = buffer[head] ;
+		head = (head + 1) % BUFFERSIZE ;
+
+		up(emptyslots) ;
+    up(c_mutex) ;
+
+		printf("C%d consumes message from P%d\n",
+			id, from) ;
+    	od ;
+	
+	
+}
+
+init {
+	atomic {
+		run Producer(0) ;
+		run Consumer(0) ;
+	            /*	run Producer(1) ; 
+		run Consumer(1) ; */
+	}
+}
+
+
+
+
+
+
+
+/*LTL properties */
+/* All properties are valid LTL Properties that help in proving the correctness of the system */
+
+
+ ltl one { <> ( fullslots > 0 && emptyslots < BUFFERSIZE )} 
+
+ltl safety_consumer {
+  []( emptyslots >= 0 && emptyslots<= BUFFERSIZE)
+} 
+
+
+ltl safety_producer {
+  []( fullslots >= 0 &&  fullslots<= BUFFERSIZE)
+}
+
+
+ltl live_producer { <>( p_want > 0 ) } 
+
+
+ltl live_consumer { !([]( c_want == 0 )) }
+
+
+/* livelines*/
+
+ltl live { <> ( c_mutex == 0 -> c_want ==0 )}
+
+/* no deadlock */
+
+/* ltl trial2 { <> ( c_mutex == 0 -> c_mutex ==1 )} */
+
+
+/* mutual exculsion */
+
+/* ltl no_consumer_producer { ! ( [] ( c_mutex == 0  && p_mutex == 0)) } */
+
+
+
+
+
+	

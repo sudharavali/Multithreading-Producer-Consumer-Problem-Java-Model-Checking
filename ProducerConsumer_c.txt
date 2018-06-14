@@ -1,0 +1,72 @@
+
+#include <stdio.h>
+#include <conio.h>
+
+
+#define MAXIMUM 1
+#define BUFFERSIZE 2
+
+#define message byte
+
+message buffer[BUFFERSIZE] ;
+byte head = 0 ;
+byte tail = 0 ;
+
+#define sema byte
+#define down(s) { atomic{s > 0 ; s--} }
+#define up(s)   { s++ }
+
+int sema fullslots = 0 ;
+int sema emptyslots = BUFFERSIZE ;
+
+int sema p_mutex = 1 ;
+int byte p_want  = 0 ;
+
+
+int sema c_mutex = 1 ;
+int byte c_want  = 0 ;
+
+
+void function Producer( byte id) {
+	
+        printf("P%d produces an item\n", id) ;
+        p_want++ ;
+        down(p_mutex) ;
+        
+        
+        down(emptyslots) ;
+        p_want-- ;
+        
+        buffer[tail] = id ;
+        tail = (tail + 1) % BUFFERSIZE ;
+        
+        up(fullslots) ;
+        up(p_mutex);
+}
+
+void function Consumer(byte id ) {
+
+        c_want++ ;
+        message from ;
+        down(c_mutex) ;
+        down(fullslots) ;
+        c_want-- ;
+        
+        from = buffer[head] ;
+        head = (head + 1) % BUFFERSIZE ;
+        
+        up(emptyslots) ;
+        up(c_mutex) ;
+        
+        printf("C%d consumes msg from P%d\n",
+        id, from) ;
+}
+
+
+
+int main()
+{
+    Producer(0) ;
+	Consumer(0) ;
+    return 0;
+}

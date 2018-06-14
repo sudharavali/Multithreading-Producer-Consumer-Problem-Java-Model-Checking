@@ -1,0 +1,23 @@
+/* All the specifications listed below are included in the promela files attached in the source code */ 
+
+Specifications for Peterson's Algorithm : 
+•	ltl first: [] ((! (critical[0])) || (! (critical[1])))
+•	ltl second: ([] (<> (critical[0]))) || ([] (<> (critical[1])))
+•	ltl third: [] (((! (critical[0])) || (critical[1])) || ((! (critical[1])) || (critical[0])))
+
+Specifications for Mutual Exclusion 2
+•	ltl one: [] (! (((process1@cs)) && ((process2@cs))))
+•	ltl two: [] ((! ((process1@wait))) || (<> ((process1@cs))))
+•	ltl three: [] ((! ((process2@wait))) || (<> ((process2@cs))))
+•	ltl AllCanEnter: [] (((! ((process1@wait))) || (<> ((process1@cs)))) && ((! ((process2@wait))) || (<> ((process2@cs)))))
+
+Specifications for Producer Consumer Buffer : 
+•	ltl one: <> (((fullslots>0)) && ((emptyslots<BUFFERSIZE)))
+•	ltl safety_consumer: [] (((emptyslots>=0)) && ((emptyslots<=BUFFERSIZE)))
+•	ltl safety_producer: [] (((fullslots>=0)) && ((fullslots<=BUFFERSIZE)))
+•	ltl live_producer: <> ((p_want>0))
+•	ltl live_consumer: ! ([] ((c_want==0)))
+•	ltl live: <> ((! ((c_mutex==0))) || ((c_want==0)))
+•	ltl trial2: <> ((! ((c_mutex==0))) || ((c_mutex==1)))
+•	ltl no_consumer_producer: ! ([] (((c_mutex==0)) && ((p_mutex==0))))
+

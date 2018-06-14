@@ -1,0 +1,50 @@
+/* Process 1 and 2 are created */
+/*Example of another Mutual Exclusion */ 
+#define cs1 process1@cs
+#define cs2 process2@cs
+#define wait1 process1@wait
+#define wait2 process2@wait
+#define true        1
+#define false       0
+bool a;
+bool b;
+bool turn;
+proctype process1( )
+{
+out:    a = true; turn = true;
+wait:   (b == false || turn == false);
+cs:     a = false; goto out;     /*enter critical section */
+}
+proctype process2( )
+{
+out:    b = true; turn = false;
+wait:   (a == false || turn == true);
+cs:     b = false; goto out;
+}
+init {
+  run process1(); 
+   run process2()
+}
+
+
+/* Safety Property */ 
+/* mutual exclusion verified */
+
+/* ltl one { [] (! (cs1 && cs2)) } */
+
+/* liveliness property */  
+
+ ltl two { [] ( wait1 -> (<>(cs1))) } 
+
+/* liveliness property 2 */ 
+
+/* ltl three { [] ( wait2 -> (<>(cs2))) } */
+
+/* All can enter */
+
+/* Fairness */ 
+
+/*  ltl AllCanEnter { [] ( (wait1 -> (<> (cs1))) && (wait2 -> (<> (cs2)))) } */ 
+
+
+
